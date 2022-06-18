@@ -349,7 +349,7 @@ class NoiseGenerator2d_withFixed(nn.Module):
         
         self.unet_opts = unet_opts
         
-        mean_noise = scipy.io.loadmat('../data/fixed_pattern_noise.mat')['mean_pattern']
+        mean_noise = scipy.io.loadmat('./data/fixed_pattern_noise.mat')['mean_pattern']
         fixed_noise = mean_noise.astype('float32')/2**16
         self.fixednoiset = torch.tensor(fixed_noise.transpose(2,0,1).copy(), dtype = torch.float32, device = device).unsqueeze(0)
 
@@ -445,7 +445,7 @@ class NoiseGenerator2d3d_distribubted(nn.Module):
         
         self.unet_opts = unet_opts
         
-        mean_noise = scipy.io.loadmat('../data/fixed_pattern_noise.mat')['mean_pattern']
+        mean_noise = scipy.io.loadmat('./data/fixed_pattern_noise.mat')['mean_pattern']
         fixed_noise = mean_noise.astype('float32')/2**16
         if 'learned' in add_fixed:
             print('using learned fixed noise')
@@ -685,7 +685,7 @@ class NoiseGenerator2d3d(nn.Module):
         
         self.unet_opts = unet_opts
         
-        mean_noise = scipy.io.loadmat('../data/fixed_pattern_noise.mat')['mean_pattern']
+        mean_noise = scipy.io.loadmat('./data/fixed_pattern_noise.mat')['mean_pattern']
         fixed_noise = mean_noise.astype('float32')/2**16
         if 'learned' in add_fixed:
             print('using learned fixed noise')

@@ -10,6 +10,7 @@ import time
 import cv2
 from skimage import exposure
 import torchvision
+from pathlib import Path
 
 def get_dataset_noise_visualization(dataset_arg):  
     crop_size = 512
@@ -601,18 +602,18 @@ class Get_sample_batch(object):
             noisy_im = noisy_im*sample_loaded['alpha']
         #noisy_im = noisy_im*sample_loaded['alpha']
 
-        sample = {'noisy_input': noisy_im, 
-              #'gt_label': gt_im,
+        sample = {'noisy_input': noisy_im,
+                  #'gt_label': gt_im,
                  'gt_label_nobias': gt_im}
-        
+
         del sample_loaded
         if self.transform:
             sample = self.transform(sample)
-        
+
         return sample
 class Get_sample_batch_video(object):
     """Convert ndarrays in sample to Tensors."""
-    
+
     def __init__(self, input_dir = '../../Datasets/Canon/mendocino_mat/sequence_', transform=None):
         """
         Args:
@@ -625,8 +626,9 @@ class Get_sample_batch_video(object):
 
     def __len__(self):
         return len(self.input_dir)
+
     def __getitem__(self, im_ind, seq_ind = None):
-        
+
         curr_num = int(self.input_dir[im_ind].split('_')[-1].split('.mat')[0])
 
         all_files = glob.glob(self.input_dir[im_ind].split('sequence')[0] +'/*.mat')
@@ -638,7 +640,7 @@ class Get_sample_batch_video(object):
 
         inds_sort = np.argsort(inds)
         all_files_sorted = np.array(all_files)[inds_sort]
-    
+
         noisy_im = np.empty((16,640,1080,4))
         #if seq_ind:
         #    for i in range(0,16):
@@ -647,21 +649,20 @@ class Get_sample_batch_video(object):
         #    seq_ind = np.random.randint(0, num_in_seq - 16)
         #    for i in range(0,16):
         #        noisy_im[i] =  scipy.io.loadmat(all_files_sorted[seq_ind+i])['noisy_list'].astype('float32')
-        
+
         for i in range(0,16):
-            noisy_im[i] =  scipy.io.loadmat(all_files_sorted[curr_num + i])['noisy_list'].astype('float32')    
-                
-        
+            noisy_im[i] =  scipy.io.loadmat(all_files_sorted[curr_num + i])['noisy_list'].astype('float32')
+
         noisy_im = noisy_im/2**16
 
         sample = {'gt_label_nobias': noisy_im}
         if self.transform:
             sample = self.transform(sample)
-        
-        return sample  
+
+        return sample 
 class Get_sample_batch_video_distributed(object):
     """Convert ndarrays in sample to Tensors."""
-    
+
     def __init__(self, generator, input_dir = '../../Datasets/Canon/mendocino_mat/sequence_', transform=None):
         """
         Args:
@@ -1127,13 +1128,20 @@ class Get_sample_batch_simvideo_distributed2(object):
         return len(self.input_dir)
     def __getitem__(self, idx):
 
+        print("-"*20)
+        print(self.input_dir[idx])
         sorted_ims = np.sort(glob.glob(self.input_dir[idx]+'/*'))
-        
+        print(self.input_dir[idx]+'/*')
+        # print(sorted_ims)
+        print(len(sorted_ims))
         if self.start_ind is not None:
                 low_ind = self.start_ind
         else:
             low_ind = np.random.randint(0,len(sorted_ims) - 15)
-        
+        # -- tesitng --
+        tmp = Path(sorted_ims[low_ind])
+        print(tmp.exists())
+        print(sorted_ims[low_ind])
         im_clean = np.array(Image.open(sorted_ims[low_ind]), dtype='float32')/2**12
         #print(idx, 'clean loaded', im_clean.shape)
         im_clean_rgbg = np.stack([im_clean[1::2,0::2], 

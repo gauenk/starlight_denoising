@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import numpy as np
-from models.spectral_normalization import SpectralNorm
+# from models.spectral_normalization import SpectralNorm
 from pathlib import Path
 
 from torch.autograd import Variable
@@ -10,7 +10,7 @@ import torch.autograd as autograd
 import scipy.io
 import argparse, json, glob, os
 
-from models.unet import Unet
+from .models.unet import Unet
 
 def t32(x):
     return torch.transpose(x,0, 2).squeeze(2)
@@ -837,6 +837,7 @@ channels = 4
 leak = 0.1
 w_g = 8
 
+"""
 class DiscriminatorS(nn.Module):
     def __init__(self):
         super(DiscriminatorS, self).__init__()
@@ -971,3 +972,4 @@ class DiscriminatorS2d_sig(nn.Module):
         #out = self.fc(m.view(-1,w_g * w_g * 512*2)).view(-1)
         #print('out', out.shape)
         return out
+"""

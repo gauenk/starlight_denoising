@@ -24,8 +24,6 @@ def plt3D(img1, title = '', size = (15,15)):
              ttl = fixed(title), 
              sz = fixed(size));
 
-    
-    
 def load_video_seq(folder_name, seq_id, start_ind, num_to_load):
     base_name_seq = folder_name + 'seq' + str(seq_id) + '/'
 
