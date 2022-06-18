@@ -1,8 +1,6 @@
 # A Python "Importable" Version of the code from...
 
-## Dancing under the stars: video denoising in starlight
-
-### [Project Page](http://kristinamonakhova.com/starlight_denoising/) | [Paper](https://openaccess.thecvf.com/content/CVPR2022/html/Monakhova_Dancing_Under_the_Stars_Video_Denoising_in_Starlight_CVPR_2022_paper.html) | [Dataset](http://kristinamonakhova.com/starlight_denoising/#dataset)
+## Dancing under the stars: video denoising in starlight [Project Page](http://kristinamonakhova.com/starlight_denoising/) | [Paper](https://openaccess.thecvf.com/content/CVPR2022/html/Monakhova_Dancing_Under_the_Stars_Video_Denoising_in_Starlight_CVPR_2022_paper.html) | [Dataset](http://kristinamonakhova.com/starlight_denoising/#dataset)
 
 ## Citation
 Please cite their work as:
