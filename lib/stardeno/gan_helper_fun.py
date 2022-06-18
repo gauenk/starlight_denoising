@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 from models.spectral_normalization import SpectralNorm
+from pathlib import Path
 
 from torch.autograd import Variable
 Tensor = torch.cuda.FloatTensor
@@ -100,7 +101,9 @@ def load_generator2(folder_name, device):
     latest_file = max(list_of_files, key=os.path.getctime)
     path = latest_file
     
-    saved_state_dict = torch.load(path, map_location='cuda:'+str(device))
+    if not isinstance(device,str):
+        device = 'cuda:'+str(device)
+    saved_state_dict = torch.load(path, map_location=device)
     distributed_model = False
     for key in saved_state_dict:
         if 'module' in key:
@@ -122,7 +125,7 @@ def load_generator2(folder_name, device):
     
     #curr_epoch = int(path.split('/')[-1].split('_')[0].split('bestgenerator')[1])
     curr_epoch = int(path.split('/')[-1].split('_')[0].split('generatorcheckpoint')[1])
-    print('current epoch', curr_epoch)
+    # print('current epoch', curr_epoch)
     
     if args.network != 'noUnet':
         generator.net.conv1.dropout = False
@@ -193,7 +196,9 @@ def load_from_checkpoint_ab(folder_name, device='cuda:0', ep='latest', new_model
         
     path = latest_file
     
-    saved_state_dict = torch.load(path, map_location ='cuda:'+str(device))
+    if not isinstance(device,str):
+        device = 'cuda:'+str(device)
+    saved_state_dict = torch.load(path, map_location=device)
     distributed_model = False
     for key in saved_state_dict:
         if 'module' in key:
@@ -215,7 +220,7 @@ def load_from_checkpoint_ab(folder_name, device='cuda:0', ep='latest', new_model
         curr_epoch = int(path.split('/')[-1].split('_')[0].split('bestgenerator')[1])
     else:
         curr_epoch = int(path.split('/')[-1].split('_')[0].split('generatorcheckpoint')[1])
-    print('current epoch', curr_epoch)
+    # print('current epoch', curr_epoch)
 
     return generator
             
@@ -335,7 +340,6 @@ class NoiseGenerator2d_withFixed(nn.Module):
     def __init__(self, net, unet_opts = 'Unet', device = 'cuda:0'):
         super(NoiseGenerator2d_withFixed, self).__init__()
         
-        print(device)
         self.device = device
         self.dtype = torch.float32
         self.shot_noise = torch.nn.Parameter(torch.tensor(0.00002, dtype = self.dtype, device = device), requires_grad = True)
@@ -346,11 +350,12 @@ class NoiseGenerator2d_withFixed(nn.Module):
         
         self.unet_opts = unet_opts
         
-        mean_noise = scipy.io.loadmat('../data/fixed_pattern_noise.mat')['mean_pattern']
+        mdir = Path(__file__).parents[0]/ "../../"
+        fname = mdir / 'data/fixed_pattern_noise.mat'
+        mean_noise = scipy.io.loadmat(fname)['mean_pattern']
         fixed_noise = mean_noise.astype('float32')/2**16
         self.fixednoiset = torch.tensor(fixed_noise.transpose(2,0,1).copy(), dtype = torch.float32, device = device).unsqueeze(0)
 
-        print(device)
     def forward(self, x, i0=None):
         
         if self.unet_opts == 'Unet_first':
@@ -430,7 +435,7 @@ class NoiseGenerator2d3d_distribubted(nn.Module):
     def __init__(self, net, unet_opts = 'Unet', device = 'cuda:0', add_fixed = 'True'):
         super(NoiseGenerator2d3d_distribubted, self).__init__()
         
-        print('generator device', device)
+        # print('generator device', device)
         self.device = device
         self.dtype = torch.float32
         self.shot_noise = torch.nn.Parameter(torch.tensor(0.00002, dtype = self.dtype, device = device), requires_grad = True)
@@ -442,7 +447,9 @@ class NoiseGenerator2d3d_distribubted(nn.Module):
         
         self.unet_opts = unet_opts
         
-        mean_noise = scipy.io.loadmat('../data/fixed_pattern_noise.mat')['mean_pattern']
+        mdir = Path(__file__).parents[0]/ "../../"
+        fname = mdir / 'data/fixed_pattern_noise.mat'
+        mean_noise = scipy.io.loadmat(fname)['mean_pattern']
         fixed_noise = mean_noise.astype('float32')/2**16
         if 'learned' in add_fixed:
             print('using learned fixed noise')
@@ -543,7 +550,7 @@ class NoiseGenerator2d3d_distributed_ablation(nn.Module):
     def __init__(self, net, unet_opts = 'noUnet', device = 'cuda:0', noise_list = 'shot_read_row'):
         super(NoiseGenerator2d3d_distributed_ablation, self).__init__()
         
-        print('generator device', device)
+        # print('generator device', device)
         self.device = device
         self.dtype = torch.float32
         self.noise_list = noise_list
@@ -567,13 +574,17 @@ class NoiseGenerator2d3d_distributed_ablation(nn.Module):
         if 'uniform' in noise_list:    
             self.uniform_noise = torch.nn.Parameter(torch.tensor(0.00001*10000, dtype = self.dtype, device = device), requires_grad = True)
         if 'fixed1' in noise_list:
-            mean_noise = scipy.io.loadmat('data/fixed_pattern_noise.mat')['mean_pattern']
+            mdir = Path(__file__).parents[0]/ "../../"
+            fname = mdir / 'data/fixed_pattern_noise.mat'
+            mean_noise = scipy.io.loadmat(fname)['mean_pattern']
             fixed_noise = mean_noise.astype('float32')/2**16
             self.fixednoiset = torch.tensor(fixed_noise.transpose(2,0,1), dtype = self.dtype, device = device).unsqueeze(0)
         if 'learnedfixed' in noise_list:
             print('using learned fixed noise')
             
-            mean_noise = scipy.io.loadmat('data/fixed_pattern_noise.mat')['mean_pattern']
+            mdir = Path(__file__).parents[0]/ "../../"
+            fname = mdir / 'data/fixed_pattern_noise.mat'
+            mean_noise = scipy.io.loadmat(fname)['mean_pattern']
             fixed_noise = mean_noise.astype('float32')/2**16
             fixednoiset = torch.tensor(fixed_noise.transpose(2,0,1), dtype = self.dtype, device = device).unsqueeze(0)
             self.fixednoiset = torch.nn.Parameter(fixednoiset, requires_grad = True)
@@ -682,7 +693,9 @@ class NoiseGenerator2d3d(nn.Module):
         
         self.unet_opts = unet_opts
         
-        mean_noise = scipy.io.loadmat('../data/fixed_pattern_noise.mat')['mean_pattern']
+        mdir = Path(__file__).parents[0]/ "../../"
+        fname = mdir / 'data/fixed_pattern_noise.mat'
+        mean_noise = scipy.io.loadmat(fname)['mean_pattern']
         fixed_noise = mean_noise.astype('float32')/2**16
         if 'learned' in add_fixed:
             print('using learned fixed noise')
