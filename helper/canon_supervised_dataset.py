@@ -447,115 +447,6 @@ class Get_sample_batch(object):
             sample = self.transform(sample)
 
         return sample
-<<<<<<< HEAD
-class Get_sample_batch_video(object):
-    """Convert ndarrays in sample to Tensors."""
-
-    def __init__(self, input_dir = '../../Datasets/Canon/mendocino_mat/sequence_', transform=None):
-        """
-        Args:
-            filenames: List of filenames
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
-        self.input_dir = input_dir
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.input_dir)
-
-    def __getitem__(self, im_ind, seq_ind = None):
-
-        curr_num = int(self.input_dir[im_ind].split('_')[-1].split('.mat')[0])
-
-        all_files = glob.glob(self.input_dir[im_ind].split('sequence')[0] +'/*.mat')
-        num_in_seq = len(all_files)
-
-        inds = []
-        for i in range(0, len(all_files)):
-            inds.append(int(all_files[i].split('_')[-1].split('.mat')[0]))
-
-        inds_sort = np.argsort(inds)
-        all_files_sorted = np.array(all_files)[inds_sort]
-
-        noisy_im = np.empty((16,640,1080,4))
-        #if seq_ind:
-        #    for i in range(0,16):
-        #        noisy_im[i] =  scipy.io.loadmat(all_files_sorted[seq_ind+i])['noisy_list'].astype('float32')
-        #else:
-        #    seq_ind = np.random.randint(0, num_in_seq - 16)
-        #    for i in range(0,16):
-        #        noisy_im[i] =  scipy.io.loadmat(all_files_sorted[seq_ind+i])['noisy_list'].astype('float32')
-
-        for i in range(0,16):
-            noisy_im[i] =  scipy.io.loadmat(all_files_sorted[curr_num + i])['noisy_list'].astype('float32')
-
-        noisy_im = noisy_im/2**16
-
-        sample = {'gt_label_nobias': noisy_im}
-        if self.transform:
-            sample = self.transform(sample)
-
-        return sample 
-class Get_sample_batch_video_distributed(object):
-    """Convert ndarrays in sample to Tensors."""
-
-    def __init__(self, generator, input_dir = '../../Datasets/Canon/mendocino_mat/sequence_', transform=None):
-        """
-        Args:
-            filenames: List of filenames
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
-        self.input_dir = input_dir
-        self.transform = transform
-        self.generator = generator
-
-    def __len__(self):
-        return len(self.input_dir)
-    def __getitem__(self, im_ind, seq_ind = None):
-        
-        curr_num = int(self.input_dir[im_ind].split('_')[-1].split('.mat')[0])
-
-        all_files = glob.glob(self.input_dir[im_ind].split('sequence')[0] +'/*.mat')
-        num_in_seq = len(all_files)
-
-        inds = []
-        for i in range(0, len(all_files)):
-            inds.append(int(all_files[i].split('_')[-1].split('.mat')[0]))
-
-        inds_sort = np.argsort(inds)
-        all_files_sorted = np.array(all_files)[inds_sort]
-    
-        noisy_im = np.empty((16,640,1080,4))
-        #if seq_ind:
-        #    for i in range(0,16):
-        #        noisy_im[i] =  scipy.io.loadmat(all_files_sorted[seq_ind+i])['noisy_list'].astype('float32')
-        #else:
-        #    seq_ind = np.random.randint(0, num_in_seq - 16)
-        #    for i in range(0,16):
-        #        noisy_im[i] =  scipy.io.loadmat(all_files_sorted[seq_ind+i])['noisy_list'].astype('float32')
-        
-        for i in range(0,16):
-            noisy_im[i] =  scipy.io.loadmat(all_files_sorted[curr_num + i])['noisy_list'].astype('float32')    
-                
-        
-        noisy_im = noisy_im/2**16
-
-        sample = {'gt_label_nobias': noisy_im,}
-        if self.transform:
-            sample = self.transform(sample)
-            
-        with torch.no_grad():
-            gt_label_t = sample['gt_label_nobias'].transpose(0,1)
-            net_input = self.generator(gt_label_t.cuda(self.generator.device)).transpose(0,1)
-        
-        sample['noisy_input']=  net_input.to('cpu')
-        
-        return sample 
-=======
-
->>>>>>> upstream/main
     
 class Get_sample_batch_video_distributed2(object):
     """Loads in images from our clean RGB+NIR video dataset"""
@@ -636,6 +527,7 @@ class Get_sample_batch_simvideo_distributed2(object):
                 low_ind = self.start_ind
         else:
             low_ind = np.random.randint(0,len(sorted_ims) - 15)
+
         # -- tesitng --
         tmp = Path(sorted_ims[low_ind])
         print(tmp.exists())

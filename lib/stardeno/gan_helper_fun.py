@@ -139,6 +139,7 @@ def load_generator2(folder_name, device):
         generator.net.conv9.dropout = False
         generator.net.convres.dropout = False
 
+
     return generator
 
 def load_from_checkpoint_ab(folder_name, device='cuda:0', ep='latest', new_model = False):
@@ -434,7 +435,7 @@ class NoiseGenerator2d(nn.Module):
 class NoiseGenerator2d3d_distribubted(nn.Module):
     def __init__(self, net, unet_opts = 'Unet', device = 'cuda:0', add_fixed = 'True'):
         super(NoiseGenerator2d3d_distribubted, self).__init__()
-        
+
         # print('generator device', device)
         self.device = device
         self.dtype = torch.float32
@@ -444,9 +445,9 @@ class NoiseGenerator2d3d_distribubted(nn.Module):
         self.row_noise_temp = torch.nn.Parameter(torch.tensor(0.000002, dtype = self.dtype, device = device), requires_grad = True)
         self.uniform_noise = torch.nn.Parameter(torch.tensor(0.00001, dtype = self.dtype, device = device), requires_grad = True)
         self.net = net
-        
+
         self.unet_opts = unet_opts
-        
+
         mdir = Path(__file__).parents[0]/ "../../"
         fname = mdir / 'data/fixed_pattern_noise.mat'
         mean_noise = scipy.io.loadmat(fname)['mean_pattern']
@@ -506,6 +507,8 @@ class NoiseGenerator2d3d_distribubted(nn.Module):
             self.all_noise['fixed'] = fixed_noise.detach().cpu().numpy()
         
         if 'True' in self.add_fixed:
+            # print(shot_noise.shape,uniform_noise.shape,
+            #       row_noise.shape,row_noise_temp.shape,fixed_noise.shape)
             noise = shot_noise + uniform_noise + row_noise + row_noise_temp + fixed_noise
         elif 'learned' in self.add_fixed:
             fixed_noise = self.fixednoiset[...,self.indices[2]:self.indices[3]]

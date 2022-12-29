@@ -144,13 +144,14 @@ def load_generator2(folder_name, device):
     return generator
 
 def load_from_checkpoint_ab(folder_name, device='cuda:0', ep='latest', new_model = False):
+    print("folder_name: ",folder_name)
     parser = argparse.ArgumentParser(description='Process some integers.')
     args = parser.parse_args('')
     with open(folder_name + '/args.txt', 'r') as f:
         args.__dict__ = json.load(f)
         args.fraction_video = 50
         args.resume_from_checkpoint = folder_name
-        
+
     if new_model == True:
         import models.fastdvdnet as fdvd
         model = fdvd.DenBlockUnet(num_input_frames=1)#.to(args.device)

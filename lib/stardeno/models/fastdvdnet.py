@@ -268,8 +268,6 @@ class FastDVDnetHR(nn.Module):
             x: Tensor, [N, num_frames*C, H, W] in the [0., 1.] range
         '''
         # Unpack inputs
-        print("HI")
-        print("x.shape: ",x.shape)
         C = 4
         x0 = x[:,:,0]
         x1 = x[:,:,1]
