@@ -18,7 +18,6 @@ def load_noise_sim(device,squares=False):
         model.forward = partial(process_with_squares,model.forward)
     return model
 
-
 def process_with_squares(model,vid,chunk_size=256):
     H,W = vid.shape[-2:]
     nH = (H-1)//chunk_size+1

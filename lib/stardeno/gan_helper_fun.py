@@ -1,3 +1,4 @@
+import torch as th
 import torch.nn as nn
 import torch
 import numpy as np
@@ -396,6 +397,19 @@ class NoiseGenerator2d_withFixed(nn.Module):
         noisy = torch.clip(noisy, 0, 1)
 
         return noisy
+
+    def run_rgb(self,vid):
+        model = self
+        assert vid.shape[-3] in [3,4],"three or four color channels."
+        device = model.device
+        if vid.shape[-3] == 3:
+            empty = th.zeros_like(vid[...,[0],:,:])
+            vid = th.cat([vid,empty],-3)
+        with th.no_grad():
+            vid = model(vid.to(device)/255.).cpu()*255.
+        vid = vid[...,:3,:,:].contiguous()
+        return vid
+
 class NoiseGenerator2d(nn.Module):
     def __init__(self, net, unet_opts = 'Unet', device = 'cuda:0'):
         super(NoiseGenerator2d, self).__init__()
@@ -432,6 +446,7 @@ class NoiseGenerator2d(nn.Module):
         noisy = torch.clip(noisy, 0, 1)
 
         return noisy
+
 class NoiseGenerator2d3d_distribubted(nn.Module):
     def __init__(self, net, unet_opts = 'Unet', device = 'cuda:0', add_fixed = 'True'):
         super(NoiseGenerator2d3d_distribubted, self).__init__()
@@ -548,6 +563,30 @@ class NoiseGenerator2d3d_distribubted(nn.Module):
 
         return noisy    
     
+    def run_rgb(self,vid):
+        if vid.ndim == 5:
+            B = vid.shape[0]
+            sim = []
+            for b in range(B):
+                sim_b = self.run_rgb_vid(vid[b])
+                sim.append(sim_b)
+            sim = th.stack(sim)
+        else:
+            sim = self.run_rgb_vid(vid)
+        return sim
+
+    def run_rgb_vid(self,vid):
+        vid_device = vid.device
+        model = self
+        assert vid.shape[-3] in [3,4],"three or four color channels."
+        device = model.device
+        if vid.shape[-3] == 3:
+            empty = th.zeros_like(vid[...,[0],:,:])
+            vid = th.cat([vid,empty],-3)
+        with th.no_grad():
+            vid = model(vid.to(device)/255.).to(vid_device)*255.
+        vid = vid[...,:3,:,:].contiguous()
+        return vid
     
 class NoiseGenerator2d3d_distributed_ablation(nn.Module):
     def __init__(self, net, unet_opts = 'noUnet', device = 'cuda:0', noise_list = 'shot_read_row'):
