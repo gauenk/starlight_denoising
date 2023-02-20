@@ -8,6 +8,21 @@ from . import utils
 import torch as th
 from functools import partial
 from pathlib import Path
+from easydict import EasyDict as edict
+
+def extract_config(_cfg):
+    cfg = edict()
+    fields = {"device":"cuda:0","load_fxn":"load_sim"}
+    for field,val in fields.items():
+        print(field,val)
+        if filed in _cfg:
+            cfg[field] = _cfg[field]
+        else:
+            cfg[field] = val
+    return cfg
+
+def load_sim(device,squares=False):
+    return load_noise_sim(device,squares)
 
 def load_noise_sim(device,squares=False):
     if "cuda" in str(device):
@@ -16,6 +31,9 @@ def load_noise_sim(device,squares=False):
     model = gh.load_generator2(mdir, device)
     if squares:
         model.forward = partial(process_with_squares,model.forward)
+
+    # -- api --
+    model.sim_type = "stardeno"
     return model
 
 def process_with_squares(model,vid,chunk_size=256):
